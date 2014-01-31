@@ -21,6 +21,19 @@ def folds?(lines, cmd, name)
   ix_start && ix_end && lines[ix_start..ix_end].index { |line| line =~ cmd }
 end
 
+def measures_time?(lines, cmd)
+  cmd = /^(?:travis_retry )?#{Regexp.escape(cmd)}/ if cmd.is_a?(String)
+
+  icmd = lines.index { |line| line =~ cmd }
+
+  return false unless icmd
+
+  x_start = lines[icmd - 1] =~ /^echo -en travis_time:start/
+  x_end   = lines[icmd + 1] =~ /^echo -en travis_time:finish:/
+
+  x_start && x_end
+end
+
 def logs?(lines, cmd)
   # cmd = /^output from #{Regexp.escape(cmd)}/
   # lines = File.read('tmp/build.log').split("\n")
@@ -43,6 +56,7 @@ def asserts?(lines, cmd)
   cmd = /^(?:travis_retry )?#{Regexp.escape(cmd)}/ if cmd.is_a?(String)
   ix = lines.index { |line| line =~ cmd }
   ix = ix + 1 if timeouts?(lines, cmd)
+  ix = ix + 1 if measures_time?(lines, cmd)
   ix && lines[ix + 1] == "travis_assert"
 end
 
@@ -88,7 +102,7 @@ end
 
 RSpec::Matchers.define :run_script do |cmd, options = {}|
   match do |script|
-    options = options.merge(echo: true, log: true, timeout: timeout_for(:script))
+    options = options.merge(echo: true, timing: true, log: true, timeout: timeout_for(:script))
     failure_message_for_should do
       "expected script to run the script #{cmd.inspect} with #{options} but it didn't:\n#{log_for(script)}"
     end
@@ -108,6 +122,7 @@ RSpec::Matchers.define :run do |cmd, options = {}|
     (!options[:log]     || logs?(lines, cmd)) &&
     (!options[:echo]    || echoes?(lines, cmd)) &&
     (!options[:retry]   || retries?(lines, cmd)) &&
+    (!options[:timing]  || measures_time?(lines, cmd)) &&
     (!options[:assert]  || asserts?(lines, cmd)) &&
     (!options[:timeout] || timeouts?(lines, cmd, options[:timeout]))
   end
@@ -161,5 +176,17 @@ RSpec::Matchers.define :fold do |cmd, name|
     end
 
     folds?(lines, cmd, name)
+  end
+end
+
+RSpec::Matchers.define :measures_time do |cmd|
+  match do |script|
+    lines = log_for(script).split("\n")
+
+    failure_message_for_should do
+      "expected the script to mark #{cmd} with fold markers named #{name.inspect}"
+    end
+
+    measures_time?(lines, cmd)
   end
 end
