@@ -14,6 +14,7 @@ puts script
 
 __END__
 {"type"=>"test",
+ "platform"=>"windows",
  "build"=>
   {"id"=>21311478,
    "number"=>"4072.2",
