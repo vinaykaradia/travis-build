@@ -133,6 +133,22 @@ module Travis
       def token
         data[:oauth_token]
       end
+
+      def platform
+        data[:platform] || 'linux'
+      end
+
+      def linux?
+        ! mac? && ! windows?
+      end
+
+      def mac?
+        platform == 'mac' || platform == 'osx'
+      end
+
+      def windows?
+        platform == 'windows'
+      end
     end
   end
 end

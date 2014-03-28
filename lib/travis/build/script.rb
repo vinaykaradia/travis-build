@@ -1,5 +1,6 @@
 require 'core_ext/hash/deep_merge'
 require 'core_ext/hash/deep_symbolize_keys'
+require 'active_support/core_ext/module/delegation'
 require 'erb'
 
 module Travis
@@ -48,6 +49,8 @@ module Travis
       include Addons, Git, Helpers, Services, Stages, DirectoryCache
 
       attr_reader :stack, :data, :options
+
+      delegate :platform, :linux?, :mac?, :windows?, to: :data
 
       def initialize(data, options)
         @data = Data.new({ config: self.class.defaults }.deep_merge(data.deep_symbolize_keys))
