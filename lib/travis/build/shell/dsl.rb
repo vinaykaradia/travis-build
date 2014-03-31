@@ -2,6 +2,11 @@ module Travis
   module Build
     module Shell
       module Dsl
+        def initialize(*args, &block)
+          @platform = args.is_a?(Hash) ? args[:platform] : nil
+          super
+        end
+
         def script(*args, &block)
           nodes << Script.new(*merge_options(args), &block)
           nodes.last

@@ -5,12 +5,13 @@ module Travis
   module Build
     module Shell
       class Node
-        attr_reader :code, :options, :level
+        attr_reader :code, :options, :level, :platform
 
         def initialize(*args)
           @options = args.last.is_a?(Hash) ? args.pop : {}
           @level = options.delete(:level) || 0
           @code = args.first
+          @platform = options[:platform]
           yield(self) if block_given?
         end
 
@@ -39,6 +40,7 @@ module Travis
           @options = args.last.is_a?(Hash) ? args.pop : {}
           @level = options.delete(:level) || 0
           @nodes = []
+          @platform = options[:platform]
           args.map { |node| cmd(node, options) }
           yield(self) if block_given?
         end
@@ -78,20 +80,39 @@ module Travis
         def initialize(condition, *args, &block)
           args.unshift(args.last.delete(:then)) if args.last.is_a?(Hash) && args.last[:then]
           super(*args, &block)
-          @open = Node.new("#{name} [[ #{condition} ]]; then", options)
+          case platform
+          when 'windows'
+            @open = Node.new("#{name} ( #{condition} ) {", options)
+          else
+            @open = Node.new("#{name} [[ #{condition} ]]; then", options)
+          end
         end
       end
 
       class If < Conditional
         def close
-          Node.new('fi', options)
+          case platform
+          when 'windows'
+            Node.new('}', options)
+          else
+            Node.new('fi', options)
+          end
         end
       end
 
       class Elif < Conditional
+        def name
+          case platform
+          when 'windows'
+            'elseif'
+          else
+            super
+          end
+        end
       end
 
       class Else < Block
+        # 'else' is identical on bash and PowerShell
         def open
           @open = Node.new('else', options)
         end
