@@ -26,7 +26,13 @@ module Travis
         end
 
         def set(var, value, options = {})
-          cmd "export #{var}=#{value}", options.merge(log: false)
+          case platform
+          when 'windows'
+            command = "Set-Variable -Name #{var} -Value #{value}"
+          else
+            command = "export #{var}=#{value}"
+          end
+          cmd command, options.merge(log: false)
         end
 
         def echo(string, options = {})

@@ -1,17 +1,14 @@
-#!/bin/bash
-source /etc/profile
-
 RED="\033[31;1m"
 GREEN="\033[32;1m"
 RESET="\033[0m"
 
-travis_start() {
-  TRAVIS_STAGE=$1
-  echo "[travis:$1:start]" <%= ">> #{logs[:state]}" if logs[:state] %>
+function travis_start($travisStage) {
+  Set-Variable -Name TRAVIS_STAGE -Value $travisStage
+  Write-Host -foregroundColor Red "[travis:${TRAVIS_STAGE}:start]" <%= ">> #{logs[:state]}" if logs[:state] %>
 }
 
-travis_finish() {
-  echo "[travis:$1:finish:result=$2]" <%= ">> #{logs[:state]}" if logs[:state] %>
+function travis_finish($travisStage, $result) {
+  Write-Host "[travis:${travisStage}:finish:result=${result}]" <%= ">> #{logs[:state]}" if logs[:state] %>
   sleep 1
 }
 

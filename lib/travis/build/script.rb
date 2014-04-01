@@ -144,7 +144,7 @@ module Travis
         end
 
         def fix_ps4
-          set "PS4", "+ ", echo: false
+          set "PS4", "+ ", echo: false unless platform == 'windows'
         end
     end
   end
