@@ -59,9 +59,16 @@ module Travis
       end
 
       def compile
-        raw template 'header.sh'
+        case platform
+        when 'windows'
+          suffix = 'ps1'
+        else
+          suffix = 'sh'
+        end
+
+        raw template "header.#{suffix}"
         run_stages if check_config
-        raw template 'footer.sh'
+        raw template "footer.#{suffix}"
         sh.to_s
       end
 
