@@ -3,7 +3,7 @@ GREEN="\033[32;1m"
 RESET="\033[0m"
 
 function travis_start($travisStage) {
-  Set-Variable -Name TRAVIS_STAGE -Value $travisStage
+  Set-Item Env:\TRAVIS_STAGE $travisStage
   Write-Host -foregroundColor Red "[travis:${TRAVIS_STAGE}:start]" <%= ">> #{logs[:state]}" if logs[:state] %>
 }
 
@@ -20,14 +20,14 @@ travis_assert() {
   fi
 }
 
-travis_result() {
-  local result=$1
+function travis_result($result) {
+  if ($TRAVIS_TEST_RESULT -eq 0
   export TRAVIS_TEST_RESULT=$(( ${TRAVIS_TEST_RESULT:-0} | $(($result != 0)) ))
 
   if [ $result -eq 0 ]; then
-    echo -e "\n${GREEN}The command \"$TRAVIS_CMD\" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>"${RESET}"
+    Write-Host -foregroundColor Green "`nThe command \"$TRAVIS_CMD\" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
   else
-    echo -e "\n${RED}The command \"$TRAVIS_CMD\" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>"${RESET}"
+    Write-Host -foregroundColor Red "`nThe command \"$TRAVIS_CMD\" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
   fi
 }
 

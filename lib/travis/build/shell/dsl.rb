@@ -28,7 +28,7 @@ module Travis
         def set(var, value, options = {})
           case platform
           when 'windows'
-            command = "Set-Variable -Name #{var} -Value #{value}"
+            command = "$Env:#{var}=#{value}"
           else
             command = "export #{var}=#{value}"
           end
@@ -36,6 +36,9 @@ module Travis
         end
 
         def echo(string, options = {})
+          if platform == 'windows'
+            string.gsub! /\n/, '`n'
+          end
           cmd "echo #{escape(string)}", echo: false, log: true
         end
 
