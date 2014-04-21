@@ -3,7 +3,7 @@ GREEN="\033[32;1m"
 RESET="\033[0m"
 
 function travis_start($travisStage) {
-  Set-Item Env:\TRAVIS_STAGE $travisStage
+  $Env:TRAVIS_STAGE = $travisStage
   Write-Host -foregroundColor Red "[travis:${TRAVIS_STAGE}:start]" <%= ">> #{logs[:state]}" if logs[:state] %>
 }
 
@@ -12,119 +12,121 @@ function travis_finish($travisStage, $result) {
   sleep 1
 }
 
-travis_assert() {
-  local result=$?
-  if [ $result -ne 0 ]; then
-    echo -e "\n${RED}The command \"$TRAVIS_CMD\" failed and exited with $result during $TRAVIS_STAGE.${RESET}\n\nYour build has been stopped." <%= ">> #{logs[:log]}" if logs[:log] %>
+function travis_assert() {
+  $Local:result = $LastExitCode
+  if ( $result -ne 0 ) {
+    Write-Host -foregroundColor Red "`nThe command ""$Env:TRAVIS_CMD"" failed and exited with $result during $Env:TRAVIS_STAGE.`n"
+    Write-Host "Your build has been stopped." <%= "| Out-file #{logs[:log]} -Append" if logs[:log] %>
     travis_terminate 2
-  fi
+  }
 }
 
 function travis_result($result) {
-  if ($TRAVIS_TEST_RESULT -eq 0
-  export TRAVIS_TEST_RESULT=$(( ${TRAVIS_TEST_RESULT:-0} | $(($result != 0)) ))
+  if ($Env:TRAVIS_TEST_RESULT -eq 0) {
+    Set-Item Env:TRAVIS_TEST_RESULT $(( ${TRAVIS_TEST_RESULT:-0} | $(($result -ne 0)) ))
+  }
 
-  if [ $result -eq 0 ]; then
-    Write-Host -foregroundColor Green "`nThe command \"$TRAVIS_CMD\" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
-  else
-    Write-Host -foregroundColor Red "`nThe command \"$TRAVIS_CMD\" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
-  fi
+  if ( $result -eq 0 ) {
+    Write-Host -foregroundColor Green "`nThe command ""$TRAVIS_CMD"" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
+  } else {
+    Write-Host -foregroundColor Red "`nThe command ""$TRAVIS_CMD"" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
+  }
 }
 
-travis_terminate() {
-  travis_finish build $1
-  pkill -9 -P $$ > /dev/null 2>&1 || true
-  exit $1
+function travis_terminate($result) {
+  travis_finish build $result
+  kill -Force (gwmi win32_process -Filter "processid='$pid'").parentprocessid 2>&1 >$null
+  exit $result
 }
 
-travis_wait() {
-  local timeout=$1
+function travis_wait() {
 
-  if [[ $timeout =~ ^[0-9]+$ ]]; then
+  if ( $args[0] -match '^[1-9][0-9]*$' ) {
     # looks like an integer, so we assume it's a timeout
-    shift
-  else
+    $Local:timeout, $Local:cmd = $args
+  } else {
     # default value
-    timeout=20
-  fi
+    $Local:timeout=20
+    $Local:cmd = $args
+  }
 
-  local cmd="$@"
-  local log_file=travis_wait_$$.log
+  $Local:log_file=travis_wait_$$.log
 
-  $cmd 2>&1 >$log_file &
-  local cmd_pid=$!
+  Invoke-Expression ($cmd -join ' ') | Out-File $log_file
+  $Local:cmd_pid=$!
 
   travis_jigger $! $timeout $cmd &
   local jigger_pid=$!
   local result
 
-  {
+  trap {
     wait $cmd_pid 2>/dev/null
-    result=$?
+    result=$LastExitCode
     ps -p$jigger_pid 2>&1>/dev/null && kill $jigger_pid
-  } || return 1
+  }
 
-  if [ $result -eq 0 ]; then
-    echo -e "\n${GREEN}The command \"$TRAVIS_CMD\" exited with $result.${RESET}"
-  else
-    echo -e "\n${RED}The command \"$TRAVIS_CMD\" exited with $result.${RESET}"
-  fi
+  if ( $result -eq 0 ) {
+    Write-Host -foregroundColor Green "`nThe command ""$TRAVIS_CMD"" exited with $result."
+  } else {
+    Write-Host -foregroundColor Red "`nThe command ""$TRAVIS_CMD"" exited with $result."
+  }
 
-  echo -e "\n${GREEN}Log:${RESET}\n"
+  Write-Host -foregroundColor Green "`nLog:`n"
   cat $log_file
 
   return $result
 }
 
-travis_jigger() {
+function travis_jigger() {
   # helper method for travis_wait()
-  local cmd_pid=$1
-  shift
-  local timeout=$1 # in minutes
-  shift
-  local count=0
-
+  $Local:cmd_pid,$Local:timeout,$Local:cmd=$args
+  $Local:count=0
+  $Local:command_string=$cmd -join ' '
 
   # clear the line
-  echo -e "\n"
+  echo "`n"
 
-  while [ $count -lt $timeout ]; do
+  while ( $count -lt $timeout ) {
     count=$(($count + 1))
-    echo -ne "Still running ($count of $timeout): $@\r"
+    Write-Host -NoNewLine "`rStill running ($count of $timeout): "
     sleep 60
-  done
+  }
 
-  echo -e "\n${RED}Timeout (${timeout} minutes) reached. Terminating \"$@\"${RESET}\n"
-  kill -9 $cmd_pid
+  Write-Host -foregroundColor Red "`nTimeout (${timeout} minutes) reached. Terminating ""$command_string""`n"
+  kill -Force $cmd_pid
 }
 
-travis_retry() {
-  local result=0
-  local count=1
-  while [ $count -le 3 ]; do
-    [ $result -ne 0 ] && {
-      echo -e "\n${RED}The command \"$@\" failed. Retrying, $count of 3.${RESET}\n" >&2
-    }
-    "$@"
-    result=$?
-    [ $result -eq 0 ] && break
-    count=$(($count + 1))
-    sleep 1
-  done
+function travis_retry() {
+  $Local:result = 0
+  $Local:count  = 1
+  $Local:cmd_string = $args -join ' '
 
-  [ $count -eq 3 ] && {
-    echo "\n${RED}The command \"$@\" failed 3 times.${RESET}\n" >&2
+  while ( $count -le 3 ) {
+    if ( $result -ne 0 ) {
+      Write-Host -foregroundColor Red "`nThe command ""$cmd_string"" failed. Retrying, $count of 3.`n" >&2
+    }
+    Invoke-Expression($cmd_string)
+    result=$LastExitCode
+    if ( $result -eq 0 ) {
+      break
+    }
+    $count=$count + 1
+    sleep 1
+  }
+
+  if ( $count -eq 3 ) {
+    Write-Host -foregroundColor Red "`nThe command ""$cmd_string"" failed 3 times.`n" >&2
   }
 
   return $result
 }
 
-decrypt() {
+function decrypt() {
   echo $1 | base64 -d | openssl rsautl -decrypt -inkey ~/.ssh/id_rsa.repo
 }
 
-mkdir -p <%= BUILD_DIR %>
-cd       <%= BUILD_DIR %>
+mkdir <%= BUILD_DIR %>
+cd    <%= BUILD_DIR %>
 
 trap 'travis_finish build 1' TERM
 trap 'TRAVIS_CMD=$TRAVIS_NEXT_CMD; TRAVIS_NEXT_CMD=${BASH_COMMAND#travis_retry }' DEBUG
