@@ -71,7 +71,8 @@ function decrypt() {
 mkdir <%= BUILD_DIR %>
 cd    <%= BUILD_DIR %>
 
-trap 'travis_finish build 1' TERM
-trap 'TRAVIS_CMD=$TRAVIS_NEXT_CMD; TRAVIS_NEXT_CMD=${BASH_COMMAND#travis_retry }' DEBUG
+# Need to replace these with Windows-minded signal processing
+# trap 'travis_finish build 1' TERM
+# trap 'TRAVIS_CMD=$TRAVIS_NEXT_CMD; TRAVIS_NEXT_CMD=${BASH_COMMAND#travis_retry }' DEBUG
 
 travis_start build
