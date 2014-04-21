@@ -39,63 +39,6 @@ function travis_terminate($result) {
   exit $result
 }
 
-function travis_wait() {
-
-  if ( $args[0] -match '^[1-9][0-9]*$' ) {
-    # looks like an integer, so we assume it's a timeout
-    $Local:timeout, $Local:cmd = $args
-  } else {
-    # default value
-    $Local:timeout=20
-    $Local:cmd = $args
-  }
-
-  $Local:log_file=travis_wait_$$.log
-
-  Invoke-Expression ($cmd -join ' ') | Out-File $log_file
-  $Local:cmd_pid=$!
-
-  travis_jigger $! $timeout $cmd &
-  local jigger_pid=$!
-  local result
-
-  trap {
-    wait $cmd_pid 2>/dev/null
-    result=$LastExitCode
-    ps -p$jigger_pid 2>&1>/dev/null && kill $jigger_pid
-  }
-
-  if ( $result -eq 0 ) {
-    Write-Host -foregroundColor Green "`nThe command ""$TRAVIS_CMD"" exited with $result."
-  } else {
-    Write-Host -foregroundColor Red "`nThe command ""$TRAVIS_CMD"" exited with $result."
-  }
-
-  Write-Host -foregroundColor Green "`nLog:`n"
-  cat $log_file
-
-  return $result
-}
-
-function travis_jigger() {
-  # helper method for travis_wait()
-  $Local:cmd_pid,$Local:timeout,$Local:cmd=$args
-  $Local:count=0
-  $Local:command_string=$cmd -join ' '
-
-  # clear the line
-  echo "`n"
-
-  while ( $count -lt $timeout ) {
-    count=$(($count + 1))
-    Write-Host -NoNewLine "`rStill running ($count of $timeout): "
-    sleep 60
-  }
-
-  Write-Host -foregroundColor Red "`nTimeout (${timeout} minutes) reached. Terminating ""$command_string""`n"
-  kill -Force $cmd_pid
-}
-
 function travis_retry() {
   $Local:result = 0
   $Local:count  = 1
