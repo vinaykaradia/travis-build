@@ -140,6 +140,7 @@ module Travis
         end
 
         def fix_etc_hosts
+          return if platform == 'windows'
           cmd %Q{sudo sed -e 's/^\\(127\\.0\\.0\\.1.*\\)$/\\1 '`hostname`'/' -i '' /etc/hosts}, assert: false, echo: false, log: false
         end
 
