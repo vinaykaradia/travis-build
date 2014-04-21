@@ -46,7 +46,7 @@ function travis_retry() {
 
   while ( $count -le 3 ) {
     if ( $result -ne 0 ) {
-      Write-Host -foregroundColor Red "`nThe command ""$cmd_string"" failed. Retrying, $count of 3.`n" >&2
+      Write-Host -foregroundColor Red "`nThe command ""$cmd_string"" failed. Retrying, $count of 3.`n" 2>&1
     }
     Invoke-Expression($cmd_string)
     result=$LastExitCode
@@ -58,7 +58,7 @@ function travis_retry() {
   }
 
   if ( $count -eq 3 ) {
-    Write-Host -foregroundColor Red "`nThe command ""$cmd_string"" failed 3 times.`n" >&2
+    Write-Host -foregroundColor Red "`nThe command ""$cmd_string"" failed 3 times.`n" 2>&1
   }
 
   return $result
