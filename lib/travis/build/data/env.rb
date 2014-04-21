@@ -5,7 +5,7 @@ module Travis
   module Build
     class Data
       class Env
-        delegate :secure_env_enabled?, :pull_request, :config, :build, :job, :repository, to: :data
+        delegate :secure_env_enabled?, :pull_request, :config, :build, :job, :repository, :platform, to: :data
 
         attr_reader :data
 
@@ -25,7 +25,7 @@ module Travis
               TRAVIS_SECURE_ENV_VARS: secure_env_vars?,
               TRAVIS_BUILD_ID:        build[:id],
               TRAVIS_BUILD_NUMBER:    build[:number],
-              TRAVIS_BUILD_DIR:       [ BUILD_DIR, repository[:slug].shellescape ].join(File::SEPARATOR),
+              TRAVIS_BUILD_DIR:       build_dir([ BUILD_DIR, repository[:slug].shellescape ].join(File::SEPARATOR)),
               TRAVIS_JOB_ID:          job[:id],
               TRAVIS_JOB_NUMBER:      job[:number],
               TRAVIS_BRANCH:          job[:branch].shellescape,
@@ -52,6 +52,10 @@ module Travis
 
           def secure_env_vars?
             secure_env_enabled? && config_vars.any?(&:secure?)
+          end
+
+          def build_dir(dir)
+            platform == 'windows' ? "\"#{dir}\"" : dir
           end
       end
     end
