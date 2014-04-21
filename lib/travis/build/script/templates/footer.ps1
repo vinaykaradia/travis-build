@@ -1,3 +1,3 @@
-echo "\nDone. Your build exited with $TRAVIS_TEST_RESULT."
+Write-Host "`nDone. Your build exited with $Env:TRAVIS_TEST_RESULT."
 
-travis_terminate $TRAVIS_TEST_RESULT
+travis_terminate $Env:TRAVIS_TEST_RESULT
