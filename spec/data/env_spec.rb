@@ -7,6 +7,7 @@ describe Travis::Build::Data::Env do
     config: { env: 'FOO=foo' },
     build: { id: '1', number: '1' },
     job: { id: '1', number: '1.1', branch: 'foo-(dev)', commit: '313f61b', commit_range: '313f61b..313f61a', commit_message: 'the commit message', os: 'linux' },
+    platform: 'linux',
     repository: { slug: 'travis-ci/travis-ci' }
     ) }
   let(:env)  { described_class.new(data) }
