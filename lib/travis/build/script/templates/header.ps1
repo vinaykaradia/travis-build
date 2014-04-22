@@ -1,7 +1,3 @@
-RED="\033[31;1m"
-GREEN="\033[32;1m"
-RESET="\033[0m"
-
 function travis_start($travisStage) {
   $Env:TRAVIS_STAGE = $travisStage
   Write-Host -foregroundColor Red "[travis:${TRAVIS_STAGE}:start]" <%= ">> #{logs[:state]}" if logs[:state] %>
