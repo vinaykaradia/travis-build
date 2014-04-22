@@ -77,14 +77,37 @@ module Travis
       end
 
       class Conditional < Block
+        POWERSHELL_OP = {
+          '=' => '-eq',
+          '!=' => '-ne'
+        }
+
+        attr_reader :condition
+
         def initialize(condition, *args, &block)
           args.unshift(args.last.delete(:then)) if args.last.is_a?(Hash) && args.last[:then]
           super(*args, &block)
+
+          @condition = condition
+
           case platform
           when 'windows'
-            @open = Node.new("#{name} ( #{condition} ) {", options)
+            @open = Node.new("#{name} ( #{powershell_cond(condition)} ) {", options)
           else
             @open = Node.new("#{name} [[ #{condition} ]]; then", options)
+          end
+        end
+
+        private
+        def powershell_cond(condition)
+          cond = condition.strip
+          case cond
+          when /\A(!?)\s*\-([a-zA-Z])\s*(\S+)\z/
+            cond = "#{$1}Test-Path #{$3}"
+          when /\A(\S+)\s*(=|!=)\s*(\S+)\z/
+            cond = POWERSHELL_OP.has_key?($2) ? "#{$1} #{POWERSHELL_OP[$2]} #{$3}" : cond
+          else
+            cond
           end
         end
       end
@@ -109,12 +132,25 @@ module Travis
             super
           end
         end
+
+        def open
+          case platform
+          when 'windows'
+            @open = Node.new("} elseif ( #{powershell_cond(condition)} ) {", options)
+          else
+            super
+          end
+        end
       end
 
       class Else < Block
-        # 'else' is identical on bash and PowerShell
         def open
-          @open = Node.new('else', options)
+          case platform
+          when 'windows'
+            @open = Node.new('} else {', options)
+          else
+            @open = Node.new('else', options)
+          end
         end
       end
     end
