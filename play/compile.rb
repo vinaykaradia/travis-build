@@ -53,8 +53,6 @@ __END__
    "description"=>"JRuby, an implementation of Ruby on the JVM"},
  "config"=>
   {:language=>"java",
-   :before_script=>
-    ["unset GEM_PATH GEM_HOME IRBRC", "export PATH=`pwd`/bin:$PATH"],
    :jdk=>"oraclejdk7",
    :env=>["TARGET='-Prake -Dtask=test:extended'"],
    :matrix=>
@@ -67,10 +65,6 @@ __END__
      :allow_failures=>
       [{:env=>"TARGET='-Prake -Dtask=spec:ci_interpreted_ir_travis'"}]},
    :branches=>{:only=>["master", "jruby-1_7", "/^test-.*$/"]},
-   :before_install=>
-    ["if [[ $TRAVIS_JDK_VERSION = 'oraclejdk8' ]]; then sudo apt-get update; sudo apt-get install oracle-java8-installer; else true; fi"],
-   :script=>
-    "( mvn install -Pbootstrap | grep -v Down ) && mvn -Dinvoker.skip=false $TARGET",
    :install=>"/bin/true",
    :notifications=>
     {:irc=>
