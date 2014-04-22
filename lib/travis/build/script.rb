@@ -135,7 +135,7 @@ module Travis
         end
 
         def fix_resolv_conf
-          return if data.skip_resolv_updates?
+          return if data.skip_resolv_updates? || platform == 'windows'
           cmd %Q{grep '199.91.168' /etc/resolv.conf > /dev/null || echo 'nameserver 199.91.168.70\nnameserver 199.91.168.71' | sudo tee /etc/resolv.conf &> /dev/null}, assert: false, echo: false, log: false
         end
 
