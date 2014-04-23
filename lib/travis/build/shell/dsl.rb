@@ -72,9 +72,9 @@ module Travis
         end
 
         def fold(name, &block)
-          raw "echo -en 'travis_fold:start:#{name}\\r'"
+          declare_fold_start(name)
           result = yield(self)
-          raw "echo -en 'travis_fold:end:#{name}\\r'"
+          declare_fold_end(name)
           result
         end
 
@@ -83,6 +83,24 @@ module Travis
           def merge_options(args, options = {})
             options = (args.last.is_a?(Hash) ? args.pop : {}).merge(options)
             args << self.options.merge(options)
+          end
+
+          def declare_fold_start(name)
+            case platform
+            when 'windows'
+              raw "Write-Host -NoNewLine \"travis_fold:start:#{name}`r\""
+            else
+              raw "echo -en 'travis_fold:start:#{name}\\r'"
+            end
+          end
+
+          def declare_fold_end(name)
+            case platform
+            when 'windows'
+              raw "Write-Host -NoNewLine \"travis_fold:end:#{name}`r\""
+            else
+              raw "echo -en 'travis_fold:end:#{name}\\r'"
+            end
           end
       end
     end
