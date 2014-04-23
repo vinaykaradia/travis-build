@@ -18,8 +18,8 @@ __END__
  "build"=>
   {"id"=>21311478,
    "number"=>"4072.2",
-   "commit"=>"9e19a3be219675437eb6a21fdbe8f120123272d0",
-   "commit_range"=>"068bdd62c92c...9e19a3be2196",
+   "commit"=>"6d7ffb15a816bbbf14b588edc954353efedb203c",
+   "commit_range"=>"068bdd62c92c...6d7ffb15a816",
    "commit_message"=>"[Truffle] Annotate specs that also fail in JRuby.",
    "branch"=>"master",
    "ref"=>nil,
@@ -29,8 +29,8 @@ __END__
  "job"=>
   {"id"=>21311478,
    "number"=>"4072.2",
-   "commit"=>"9e19a3be219675437eb6a21fdbe8f120123272d0",
-   "commit_range"=>"068bdd62c92c...9e19a3be2196",
+   "commit"=>"6d7ffb15a816bbbf14b588edc954353efedb203c",
+   "commit_range"=>"068bdd62c92c...6d7ffb15a816",
    "commit_message"=>"[Truffle] Annotate specs that also fail in JRuby.",
    "branch"=>"master",
    "ref"=>nil,
