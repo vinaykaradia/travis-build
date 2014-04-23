@@ -48,7 +48,7 @@ function travis_retry() {
       Write-Host -foregroundColor Red "`nThe command ""$cmd_string"" failed. Retrying, $count of 3.`n" 2>&1
     }
     Invoke-Expression($cmd_string)
-    result = $LastExitCode
+    $result = $LastExitCode
     if ( $result -eq 0 ) {
       break
     }
