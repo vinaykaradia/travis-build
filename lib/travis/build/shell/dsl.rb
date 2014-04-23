@@ -28,7 +28,9 @@ module Travis
         def set(var, value, options = {})
           case platform
           when 'windows'
-            command = "$Env:#{var}=#{value}"
+            command = "$Env:#{var}=@'
+#{value}
+'@"
           else
             command = "export #{var}=#{value}"
           end
