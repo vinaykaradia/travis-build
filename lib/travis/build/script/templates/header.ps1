@@ -18,10 +18,13 @@ function travis_assert() {
 }
 
 function travis_result($result) {
-  if ($Env:TRAVIS_TEST_RESULT -eq 0) {
-    Set-Item Env:TRAVIS_TEST_RESULT $(( ${TRAVIS_TEST_RESULT:-0} | $(($result -ne 0)) ))
+  if ( !(Test-Path Env:TRAVIS_TEST_RESULT) ) { $Env:TRAVIS_TEST_RESULT = 0 }
+  if ( $result -ne 0 ) {
+    $Env:TRAVIS_TEST_RESULT = $Env:TRAVIS_TEST_RESULT -bOr 1
+  } else {
+    $Env:TRAVIS_TEST_RESULT = $Env:TRAVIS_TEST_RESULT -bOr 0
   }
-
+  
   if ( $result -eq 0 ) {
     Write-Host -foregroundColor Green "`nThe command ""$TRAVIS_CMD"" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
   } else {
