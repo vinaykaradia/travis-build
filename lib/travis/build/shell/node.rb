@@ -103,7 +103,7 @@ module Travis
           cond = condition.strip
           case cond
           when /\A(!?)\s*\-([a-zA-Z])\s*(\S+)\z/
-            cond = "#{$1}Test-Path #{$3}"
+            cond = "#{$1}(Test-Path #{$3})"
           when /\A(\S+)\s*(=|!=)\s*(\S+)\z/
             cond = POWERSHELL_OP.has_key?($2) ? "#{$1} #{POWERSHELL_OP[$2]} #{$3}" : cond
           else
