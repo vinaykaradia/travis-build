@@ -26,9 +26,9 @@ function travis_result($result) {
   }
   
   if ( $result -eq 0 ) {
-    Write-Host -foregroundColor Green "`nThe command ""$TRAVIS_CMD"" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
+    Write-Host -foregroundColor Green "`nThe command ""$Env:TRAVIS_CMD"" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
   } else {
-    Write-Host -foregroundColor Red "`nThe command ""$TRAVIS_CMD"" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
+    Write-Host -foregroundColor Red "`nThe command ""$Env:TRAVIS_CMD"" exited with $result."<%= " >> #{logs[:log]}" if logs[:log] %>
   }
 }
 
