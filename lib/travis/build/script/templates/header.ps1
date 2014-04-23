@@ -63,8 +63,8 @@ function travis_retry() {
   return $result
 }
 
-function decrypt() {
-  echo $1 | base64 -d | openssl rsautl -decrypt -inkey ~/.ssh/id_rsa.repo
+function decrypt($str) {
+  [System.Text.Encoding]::UNICODE.GetString([System.Convert]::FromBase64String($str)) | openssl rsautl -decrypt -inkey ~/.ssh/id_rsa.repo
 }
 
 mkdir <%= BUILD_DIR %>
