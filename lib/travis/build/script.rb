@@ -36,7 +36,7 @@ module Travis
       TEMPLATES_PATH = File.expand_path('../script/templates', __FILE__)
 
       STAGES = {
-        builtin: [:export, :fix_resolv_conf, :fix_etc_hosts, :checkout, :setup, :announce, :fix_ps4],
+        builtin: [:export, :fix_resolv_conf, :fix_etc_hosts, :fix_ssl, :checkout, :setup, :announce, :fix_ps4],
         custom:  [:before_install, :install, :before_script, :script, :after_result, :after_script]
       }
 
@@ -97,6 +97,10 @@ module Travis
         end
 
         def export
+          set 'TRAVIS', 'true', echo: false
+          set 'CI', 'true', echo: false
+          set 'CONTINUOUS_INTEGRATION', 'true', echo: false
+          set 'HAS_JOSH_K_SEAL_OF_APPROVAL', 'true', echo: false
           data.env_vars.each do |var|
             set var.key, var.value, echo: var.to_s
           end
@@ -127,10 +131,16 @@ module Travis
           end
         end
 
+        def fix_ssl
+          echo 'Applying updates'
+          cmd 'sudo apt-get update -qq > /dev/null', echo: false, assert: false
+          cmd 'sudo apt-get install -qqqq -y libssl1.0.0 openssl > /dev/null', echo: false, assert: false
+        end
+
         def setup_apt_cache
           if data.hosts && data.hosts[:apt_cache]
             cmd 'echo -e "\033[33;1mSetting up APT cache\033[0m"', assert: false, echo: false
-            cmd %Q{echo 'Acquire::http { Proxy "#{data.hosts[:apt_cache]}"; };' | sudo tee /etc/apt/apt.conf.d/01proxy  > /dev/null 2>&1}, echo: false, assert: false, log: false
+            cmd %Q{echo 'Acquire::http { Proxy "#{data.hosts[:apt_cache]}"; };' | sudo tee /etc/apt/apt.conf.d/01proxy &> /dev/null}, echo: false, assert: false, log: false
           end
         end
 
@@ -141,7 +151,7 @@ module Travis
 
         def fix_etc_hosts
           return if platform == 'windows'
-          cmd %Q{sudo sed -e 's/^\\(127\\.0\\.0\\.1.*\\)$/\\1 '`hostname`'/' -i '' /etc/hosts}, assert: false, echo: false, log: false
+          cmd %Q{sudo sed -e 's/^\\(127\\.0\\.0\\.1.*\\)$/\\1 '`hostname`'/' -i'.bak' /etc/hosts}, assert: false, echo: false, log: false
         end
 
         def fix_ps4

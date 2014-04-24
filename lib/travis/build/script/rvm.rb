@@ -3,8 +3,8 @@ module Travis
     class Script
       module RVM
         USER_DB = %w[
-          rvm_remote_server_url3=https://s3.amazonaws.com/travis-rubies
-          rvm_remote_server_path3=binary
+          rvm_remote_server_url3=https://s3.amazonaws.com/travis-rubies/binaries
+          rvm_remote_server_type3=rubies
           rvm_remote_server_verify_downloads3=1
         ].join("\n")
 
@@ -31,6 +31,12 @@ module Travis
               cmd "rvm install #{ruby_version} --binary"
             end
             cmd "rvm use #{ruby_version}"
+          elsif ruby_version == 'default'
+            self.if "-f .ruby-version" do |script|
+              script.cmd 'echo -e "\033[33mBETA:\033[0m Using Ruby version from .ruby-version. This is a beta feature and may be removed in the future."', echo: false, assert: false
+              script.cmd "rvm use . --install --binary --fuzzy"
+            end
+            self.else "rvm use default"
           else
             cmd "rvm use #{ruby_version} --install --binary --fuzzy"
           end
