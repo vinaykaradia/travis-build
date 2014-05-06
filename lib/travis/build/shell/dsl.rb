@@ -45,7 +45,7 @@ module Travis
         def if(*args, &block)
           args = merge_options(args)
           els_ = args.last.delete(:else)
-          nodes << If.new(*args, &block)
+          nodes << If.create(platform, *args, &block)
           self.else(els_, args.last) if els_
           nodes.last
         end

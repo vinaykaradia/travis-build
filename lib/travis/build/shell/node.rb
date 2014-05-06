@@ -1,5 +1,8 @@
 require 'shellwords'
 require 'core_ext/string/indent'
+require 'travis/build/shell/node/linux'
+require 'travis/build/shell/node/osx'
+require 'travis/build/shell/node/windows'
 
 module Travis
   module Build
@@ -113,26 +116,16 @@ module Travis
       end
 
       class If < Conditional
+        def self.create(platform, *args, &block)
+          const_get(platform.capitalize).new(*args, &block)
+        end
+
         def close
-          case platform
-          when 'windows'
-            Node.new('}', options)
-          else
-            Node.new('fi', options)
-          end
+          Node.new('fi', options)
         end
       end
 
       class Elif < Conditional
-        def name
-          case platform
-          when 'windows'
-            'elseif'
-          else
-            super
-          end
-        end
-
         def open
           case platform
           when 'windows'
