@@ -56,6 +56,8 @@ module Travis
         @data = Data.new({ config: self.class.defaults }.deep_merge(data.deep_symbolize_keys))
         @options = options
         @stack = [Shell::Script.new(platform: @data.platform, log: true, echo: true, log_file: logs[:build])]
+
+        Travis::Build::Script::Helpers.define_instance_methods platform
       end
 
       def compile

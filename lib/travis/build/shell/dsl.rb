@@ -1,3 +1,7 @@
+require 'travis/build/shell/dsl/linux'
+require 'travis/build/shell/dsl/osx'
+require 'travis/build/shell/dsl/windows'
+
 module Travis
   module Build
     module Shell

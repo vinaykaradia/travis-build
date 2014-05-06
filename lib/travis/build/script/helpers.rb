@@ -2,12 +2,12 @@ module Travis
   module Build
     class Script
       module Helpers
-        Shell::Dsl.instance_methods(false).each do |name|
-          define_method(name) do |*args, &block|
-            options = args.last if args.last.is_a?(Hash)
-            args.last[:timeout] = data.timeouts[options[:timeout]] if options && options.key?(:timeout)
-            sh.send(name, *args, &stacking(&block))
-          end
+
+        def self.define_instance_methods(platform)
+          define_instance_methods_for(Travis::Build::Shell::Dsl)
+          define_instance_methods_for(Travis::Build::Shell::Dsl.const_get(platform.capitalize))
+        rescue NameError => e
+          raise NameError, "Platform #{platform} is not supported."
         end
 
         def sh
@@ -29,6 +29,18 @@ module Travis
 
         def announce?(stage)
           stage && stage != :after_result
+        end
+
+        private
+
+        def self.define_instance_methods_for(mod)
+          mod.instance_methods(false).each do |name|
+            define_method(name) do |*args, &block|
+              options = args.last if args.last.is_a?(Hash)
+              args.last[:timeout] = data.timeouts[options[:timeout]] if options && options.key?(:timeout)
+              sh.send(name, *args, &stacking(&block))
+            end
+          end
         end
       end
     end
