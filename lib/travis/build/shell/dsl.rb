@@ -30,6 +30,7 @@ module Travis
         end
 
         def set(var, value, options = {})
+          command = "export #{var}=#{value}"
           cmd command, options.merge(log: false)
         end
 
