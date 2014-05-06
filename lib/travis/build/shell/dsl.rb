@@ -30,21 +30,10 @@ module Travis
         end
 
         def set(var, value, options = {})
-          case platform
-          when 'windows'
-            command = "$Env:#{var}=@'
-#{value}
-'@"
-          else
-            command = "export #{var}=#{value}"
-          end
           cmd command, options.merge(log: false)
         end
 
         def echo(string, options = {})
-          if platform == 'windows'
-            string.gsub! /\n/, '`n'
-          end
           cmd "echo #{escape(string)}", echo: false, log: true
         end
 
@@ -90,21 +79,11 @@ module Travis
           end
 
           def declare_fold_start(name)
-            case platform
-            when 'windows'
-              raw "Write-Host -NoNewLine \"travis_fold:start:#{name}`r\""
-            else
-              raw "echo -en 'travis_fold:start:#{name}\\r'"
-            end
+            raw "echo -en 'travis_fold:start:#{name}\\r'"
           end
 
           def declare_fold_end(name)
-            case platform
-            when 'windows'
-              raw "Write-Host -NoNewLine \"travis_fold:end:#{name}`r\""
-            else
-              raw "echo -en 'travis_fold:end:#{name}\\r'"
-            end
+            raw "echo -en 'travis_fold:end:#{name}\\r'"
           end
       end
     end
