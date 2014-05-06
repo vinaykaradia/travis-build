@@ -19,7 +19,7 @@ module Travis
         end
 
         def name
-          self.class.name.split('::').last.downcase
+          raise "#name has been called"
         end
 
         def to_s
@@ -123,6 +123,10 @@ module Travis
         def close
           Node.new('fi', options)
         end
+
+        def name
+          'if'
+        end
       end
 
       class Elif < Conditional
@@ -134,6 +138,10 @@ module Travis
             super
           end
         end
+
+        def name
+          'elif'
+        end
       end
 
       class Else < Block
@@ -144,6 +152,10 @@ module Travis
           else
             @open = Node.new('else', options)
           end
+        end
+
+        def name
+          'else'
         end
       end
     end
