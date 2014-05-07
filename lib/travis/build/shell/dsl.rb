@@ -50,13 +50,25 @@ module Travis
           nodes.last
         end
 
+        def if_file_exists(*args, &block)
+          args_new = args.dup
+          args_new[0] = '-f ' + args.first
+          self.if(*args_new)
+        end
+
         def elif(*args, &block)
           raise InvalidParent.new(Elif, If, nodes.last.class) unless nodes.last.is_a?(If)
           args = merge_options(args)
           els_ = args.last.delete(:else)
-          nodes.last.raw Elif.new(*args, &block)
+          nodes.last.raw Elif.create(platform, *args, &block)
           self.else(els_, args.last) if els_
           nodes.last
+        end
+
+        def elif_file_exists(*args, &block)
+          args_new = args.dup
+          args_new[0] = '-f ' + args.first
+          elif(*args_new)
         end
 
         def else(*args, &block)

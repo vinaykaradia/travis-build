@@ -82,6 +82,10 @@ module Travis
       class Conditional < Block
         attr_reader :condition
 
+        def self.create(platform, *args, &block)
+          const_get(platform.capitalize).new(*args, &block)
+        end
+
         def initialize(condition, *args, &block)
           args.unshift(args.last.delete(:then)) if args.last.is_a?(Hash) && args.last[:then]
           super(*args, &block)
@@ -93,10 +97,6 @@ module Travis
       end
 
       class If < Conditional
-        def self.create(platform, *args, &block)
-          const_get(platform.capitalize).new(*args, &block)
-        end
-
         def close
           Node.new('fi', options)
         end
