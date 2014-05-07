@@ -56,11 +56,11 @@ module Travis
         private
 
         def has_podfile?(*args)
-          self.if '-f Podfile', *args
+          self.if_file_exists 'Podfile', *args
         end
 
         def has_gemfile?(*args)
-          self.if '-f Gemfile', *args
+          self.if_file_exists 'Gemfile', *args
         end
 
         def uses_rubymotion?(*args)

@@ -54,7 +54,7 @@ module Travis
         private
 
           def uses_npm?(*args)
-            self.if '-f package.json', *args
+            self.if_file_exists '-f package.json', *args
           end
 
           def node_0_6?

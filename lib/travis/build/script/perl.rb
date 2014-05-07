@@ -31,8 +31,8 @@ module Travis
         end
 
         def script
-          self.if   '-f Build.PL',    'perl Build.PL && ./Build && ./Build test'
-          self.elif '-f Makefile.PL', 'perl Makefile.PL && make test'
+          self.if_file_exists   'Build.PL',    'perl Build.PL && ./Build && ./Build test'
+          self.elif_file_exists 'Makefile.PL', 'perl Makefile.PL && make test'
           self.else                   'make test'
         end
 

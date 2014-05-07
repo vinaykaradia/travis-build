@@ -28,7 +28,7 @@ module Travis
 
         def install
           # # composer is not yet ready for prime time. MK.
-          # self.if '-f composer.json', "composer install #{config[:composer_args]}".strip
+          # self.if_file_exists 'composer.json', "composer install #{config[:composer_args]}".strip
         end
 
         def script

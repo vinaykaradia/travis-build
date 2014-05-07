@@ -30,8 +30,8 @@ module Travis
         end
 
         def install
-          self.if   '-f Requirements.txt', "pip install -r Requirements.txt", fold: 'install', retry: true
-          self.elif '-f requirements.txt', "pip install -r requirements.txt", fold: 'install', retry: true
+          self.if_file_exists   'Requirements.txt', "pip install -r Requirements.txt", fold: 'install', retry: true
+          self.elif_file_exists 'requirements.txt', "pip install -r requirements.txt", fold: 'install', retry: true
           self.else { echo NO_REQUIREMENTS }
         end
 

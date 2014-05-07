@@ -83,7 +83,7 @@ module Travis
           end
 
           def gemfile?(*args, &block)
-            self.if "-f #{config[:gemfile]}", *args, &block
+            self.if_file_exists config[:gemfile], *args, &block
           end
 
           def uses_java?

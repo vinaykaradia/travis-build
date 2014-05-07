@@ -83,7 +83,7 @@ module Travis
           end
 
           def submodules
-            self.if '-f .gitmodules' do
+            self.if_file_exists '.gitmodules' do
               cmd 'echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config', echo: false
               cmd 'git submodule init', fold: "git.#{next_git_fold_number}"
               cmd 'git submodule update', assert: true, timeout: :git_submodules, fold: "git.#{next_git_fold_number}", retry: true
