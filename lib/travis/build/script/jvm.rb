@@ -20,6 +20,7 @@ module Travis
           self.elif_file_exists 'pom.xml',      'mvn test -B'
           self.else                    'ant test'
         end
+
       end
     end
   end
