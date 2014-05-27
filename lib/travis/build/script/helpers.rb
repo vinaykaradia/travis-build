@@ -3,8 +3,8 @@ module Travis
     class Script
       module Helpers
         def self.define_instance_methods(platform)
-          define_instance_methods_for(Travis::Build::Shell::Dsl)
-          define_instance_methods_for(Travis::Build::Shell::Dsl.const_get(platform.capitalize))
+          define_instance_methods_for(Travis::Build::Shell::Base::Dsl)
+          define_instance_methods_for(Travis::Build::Shell.const_get(platform.capitalize)::Dsl)
         rescue NameError => e
           raise NameError, "Platform #{platform} is not supported."
         end

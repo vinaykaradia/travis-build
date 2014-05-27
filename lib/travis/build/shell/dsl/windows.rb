@@ -1,9 +1,9 @@
 module Travis
   module Build
     module Shell
-      module Dsl
-        module Windows
-          include Travis::Build::Shell::Dsl
+      module Windows
+        module Dsl
+          include Travis::Build::Shell::Base
 
           def initialize(*args, &block)
             @platform = args.is_a?(Hash) ? args[:platform] : nil
