@@ -2,7 +2,6 @@ module Travis
   module Build
     class Script
       module Helpers
-
         def self.define_instance_methods(platform)
           define_instance_methods_for(Travis::Build::Shell::Dsl)
           define_instance_methods_for(Travis::Build::Shell::Dsl.const_get(platform.capitalize))

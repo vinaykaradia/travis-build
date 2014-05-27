@@ -2,26 +2,6 @@ module Travis
   module Build
     module Shell
       module Filters
-        module Logging
-          def code
-            options[:log] && options[:log_file] ? log(super) : super
-          end
-
-          def log(code)
-            "#{code} &>> #{options[:log_file]}"
-          end
-        end
-
-        module Timeout
-          def code
-            options[:timeout] ? timeout(super) : super
-          end
-
-          def timeout(code)
-            "tlimit -c #{options[:timeout]} #{code}"
-          end
-        end
-
         module Assertion
           def code
             options[:assert] ? assert(super) : super
