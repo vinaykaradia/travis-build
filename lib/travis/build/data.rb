@@ -9,21 +9,7 @@ module Travis
       autoload :Env, 'travis/build/data/env'
       autoload :Var, 'travis/build/data/var'
 
-      DEFAULTS = {
-        timeouts: {
-          # git_clone:      300,
-          # git_fetch_ref:  300,
-          # git_submodules: 300,
-          # start_service:  60,
-          # before_install: 300,
-          # install:        600,
-          # before_script:  600,
-          # script:         1500,
-          # after_success:  300,
-          # after_failure:  300,
-          # after_script:   300
-        }
-      }
+      DEFAULTS = { }
 
       DEFAULT_CACHES = {
         apt:     false,
@@ -42,10 +28,6 @@ module Travis
         data[:urls] || {}
       end
 
-      def timeouts
-        data[:timeouts] || {}
-      end
-
       def config
         data[:config]
       end
@@ -54,8 +36,16 @@ module Travis
         data[:hosts] || {}
       end
 
+      def paranoid_mode?
+        data.fetch(:paranoid, false)
+      end
+
       def skip_resolv_updates?
-        !!data[:skip_resolv_updates]
+        data.fetch(:skip_resolv_updates, false)
+      end
+
+      def skip_etc_hosts_fix?
+        data.fetch(:skip_etc_hosts_fix, false)
       end
 
       def cache_options

@@ -51,7 +51,6 @@ shared_examples_for 'a build script' do
   %w(before_install install before_script script after_script after_success).each do |script|
     it "runs the given :#{script} command" do
       data['config'][script] = script
-      timeout = Travis::Build::Data::DEFAULTS[:timeouts][script.to_sym]
       assert = %w(before_install install before_script).include?(script)
       should run script, echo: true, log: true, timing: true, assert: assert, timeout: timeout
     end
@@ -93,6 +92,23 @@ shared_examples_for 'a build script' do
 
   it "adds an entry to /etc/hosts for localhost" do
     subject.should include(%Q{sudo sed -e 's/^\\(127\\.0\\.0\\.1.*\\)$/\\1 '`hostname`'/' -i'.bak' /etc/hosts})
+  end
+
+  it "skips adding an entry to /etc/hosts for localhost" do
+    data['skip_etc_hosts_fix'] = true
+    subject.should_not include(%Q{sudo sed -e 's/^\\(127\\.0\\.0\\.1.*\\)$/\\1 '`hostname`'/' -i'.bak' /etc/hosts})
+  end
+
+  # further specs for not allowing services should be added
+  describe "paranoid mode" do
+    it "does not remove access to sudo by default" do
+      subject.should_not include(%Q{sudo -n sh -c "sed -e 's/^%.*//' -i.bak /etc/sudoers && rm -f /etc/sudoers.d/travis && find / -perm -4000 -exec chmod a-s {} \\; 2>/dev/null"})
+    end
+
+    it "removes access to sudo if enabled in the config" do
+      data['paranoid'] = true
+      subject.should include(%Q{sudo -n sh -c "sed -e 's/^%.*//' -i.bak /etc/sudoers && rm -f /etc/sudoers.d/travis && find / -perm -4000 -exec chmod a-s {} \\; 2>/dev/null"})
+    end
   end
 
   describe "result" do
