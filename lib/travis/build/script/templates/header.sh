@@ -9,11 +9,11 @@ TIMEFORMAT="u=%U:r=%E:s=%S"
 
 travis_start() {
   TRAVIS_STAGE=$1
-  echo "[travis:$1:start]" <%= ">> #{logs[:state]}" if logs[:state] %>
+  echo "[travis:$1:start]"
 }
 
 travis_finish() {
-  echo "[travis:$1:finish:result=$2]" <%= ">> #{logs[:state]}" if logs[:state] %>
+  echo "[travis:$1:finish:result=$2]"
   sleep 1
 }
 

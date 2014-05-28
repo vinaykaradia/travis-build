@@ -45,7 +45,6 @@ end
 def asserts?(lines, cmd)
   cmd = /^(?:travis_retry )?#{Regexp.escape(cmd)}/ if cmd.is_a?(String)
   ix = lines.index { |line| line =~ cmd }
-  ix = ix + 1 if timeouts?(lines, cmd)
   ix = ix + 1 if measures_time?(lines, cmd)
   ix && lines[ix + 1] == "travis_assert"
 end
@@ -92,7 +91,7 @@ end
 
 RSpec::Matchers.define :run_script do |cmd, options = {}|
   match do |script|
-    options = options.merge(echo: true, timing: true, log: true, timeout: timeout_for(:script))
+    options = options.merge(echo: true, timing: true, log: true)
     options = options.merge(echo: true, log: true)
     failure_message_for_should do
       "expected script to run the script #{cmd.inspect} with #{options} but it didn't:\n#{log_for(script)}"
@@ -114,8 +113,7 @@ RSpec::Matchers.define :run do |cmd, options = {}|
     (!options[:echo]    || echoes?(lines, cmd)) &&
     (!options[:retry]   || retries?(lines, cmd)) &&
     (!options[:timing]  || measures_time?(lines, cmd)) &&
-    (!options[:assert]  || asserts?(lines, cmd)) &&
-    (!options[:timeout] || timeouts?(lines, cmd, options[:timeout]))
+    (!options[:assert]  || asserts?(lines, cmd))
   end
 end
 
