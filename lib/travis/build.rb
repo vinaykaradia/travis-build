@@ -17,16 +17,22 @@ module Travis
 
       def script(data, options = {})
         data  = data.deep_symbolize_keys
-        lang  = (Array(data[:config][:language]).first || 'ruby').downcase.strip
+        lang  = Array(data[:config][:language]).first || 'ruby'
         const = by_lang(lang)
         const.new(data, options)
       end
 
       def by_lang(lang)
-        case lang
-        when /^java/i then
+        if lang != lang.downcase
+          # we should be running on the default image
+          # see https://github.com/travis-ci/travis-ci/issues/2708
+          return Script::Ruby
+        end
+
+        case lang.downcase.strip
+        when /^java/
           Script::PureJava
-        when "c++", "cpp", "cplusplus" then
+        when "c++", "cpp", "cplusplus"
           Script::Cpp
         when 'objective-c'
           Script::ObjectiveC
