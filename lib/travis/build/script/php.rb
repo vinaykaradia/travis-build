@@ -22,6 +22,9 @@ module Travis
 
         def setup
           super
+          self.if '$TRAVIS_PHP_VERSION = "hhvm"' do |hhvm|
+            hhvm.cmd 'echo "hhvm.libxml.ext_entity_whitelist=file,http,https" | sudo tee -a /etc/hhvm/php.ini', echo: false
+          end
           cmd "phpenv global #{config[:php]}", assert: true
         end
 
