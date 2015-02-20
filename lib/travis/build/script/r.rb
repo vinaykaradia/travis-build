@@ -16,7 +16,6 @@ module Travis
           # Build/test options
           r_build_args: '',
           r_check_args: '--as-cran',
-          r_check_cran_incoming: false,
           r_check_revdep: false,
           # Heavy dependencies
           pandoc: true,
@@ -51,8 +50,8 @@ module Travis
                   ansi: :green
           sh.echo '  https://github.com/travis-ci/travis-ci/issues' +
                   '/new?labels=community:r', ansi: :green
-          sh.echo 'and mention \`@craigcitro\`, \`@eddelbuettel\` and ' +
-                  '\`@hadley\` in the issue', ansi: :green
+          sh.echo 'and mention @craigcitro, @eddelbuettel and ' +
+                  '@hadley in the issue', ansi: :green
 
           # TODO(craigcitro): python-software-properties?
           sh.echo 'Installing R'
@@ -140,11 +139,6 @@ module Travis
           # Test the package
           sh.echo 'Testing with: R CMD check "${PKG_TARBALL}" ' +
                   "#{config[:r_check_args]}"
-          sh.export '_R_CHECK_CRAN_INCOMING_', as_r_boolean(
-                      config[:r_check_cran_incoming])
-          if config[:r_check_cran_incoming]
-            sh.echo "(CRAN incoming checks are off)"
-          end
           sh.cmd "R CMD check \"${PKG_TARBALL}\" #{config[:r_check_args]}"
 
           # Turn warnings into errors, if requested.
@@ -363,7 +357,7 @@ module Travis
           pandoc_url = 'https://s3.amazonaws.com/rstudio-buildtools/pandoc-' +
                        "#{config[:pandoc_version]}.zip"
           pandoc_srcdir = "pandoc-#{config[:pandoc_version]}/#{os_path}"
-          pandoc_destdir = File.join(Dir.home(), 'opt/pandoc')
+          pandoc_destdir = '${HOME}/opt/pandoc'
           pandoc_tmpfile = "/tmp/pandoc-#{config[:pandoc_version]}.zip"
           
           sh.mkdir pandoc_destdir, recursive: true
