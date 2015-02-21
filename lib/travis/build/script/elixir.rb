@@ -14,7 +14,7 @@ module Travis
 
         def announce
           super
-          sh.cmd "kiex use #{elixir_version} || kiex install #{elixir_version}"
+          sh.cmd "kiex list | grep elixir-#{elixir_version} 2>&1 > /dev/null || kiex install #{elixir_version}", echo: false
           sh.cmd "elixir --version"
         end
 
