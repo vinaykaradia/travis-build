@@ -1,5 +1,6 @@
 require 'travis/build/appliances/checkout'
 require 'travis/build/appliances/deprecations'
+require 'travis/build/appliances/disable_ecn'
 require 'travis/build/appliances/disable_sudo'
 require 'travis/build/appliances/env'
 require 'travis/build/appliances/fix_etc_hosts'

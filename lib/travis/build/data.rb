@@ -98,6 +98,10 @@ module Travis
         !!job[:secure_env_enabled]
       end
 
+      def disable_ecn?
+        !!data[:paranoid]
+      end
+
       def disable_sudo?
         !!data[:paranoid]
       end
