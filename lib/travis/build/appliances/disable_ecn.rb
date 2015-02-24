@@ -7,7 +7,7 @@ module Travis
         CMD = 'echo 0 | sudo tee /proc/sys/net/ipv4/tcp_ecn'
 
         def apply
-          sh.echo "Disabling ECN", ansi: yellow
+          sh.echo "Disabling ECN", ansi: :yellow
           sh.cmd CMD
         end
 
